@@ -1,22 +1,28 @@
 <?php
 
 //Hide menus based on user or capability
-add_action( 'admin_menu', 'ft_remove_custom_menus', 999 );
-function ft_remove_custom_menus () {
-
-	//Remove menus by not allowed user IDs
-	$allowed_ids = array(1, 4, 7, 15);
-	if( !in_array(get_current_user_id(), $allowed_ids) ) {
-		//The user ID is not in the array of IDs, remove menus
-		remove_menu_page( 'some-admin-page.php' );
-		remove_submenu_page( 'options-general.php', 'certain-plugin-settings' );
+add_action( 'admin_menu', 'ft_remove_menus' );
+function ft_remove_menus(){
+	$author = wp_get_current_user();
+	if(isset($author->roles[0])){
+		$current_role = $author->roles[0];
+	}else{
+		$current_role = 'no_role';
 	}
-	
-	//Remove menus by not allowed user capability
-	if( !current_user_can('install_themes') ) { 
-		//Current user can't install theme, remove other menus too
-	}	
-	
+	$allowed_ids = array(1, 4, 7, 15);
+	if(($current_role != 'no_role') || ( !in_array(get_current_user_id(), $allowed_ids) )){
+		remove_menu_page( 'index.php' );                  //Dashboard
+		remove_menu_page( 'jetpack' );                    //Jetpack*
+		remove_menu_page( 'edit.php' );                   //Posts
+		remove_menu_page( 'upload.php' );                 //Media
+		remove_menu_page( 'edit.php?post_type=page' );    //Pages
+		remove_menu_page( 'edit-comments.php' );          //Comments
+		remove_menu_page( 'themes.php' );                 //Appearance
+		remove_menu_page( 'plugins.php' );                //Plugins
+		remove_menu_page( 'users.php' );                  //Users
+		remove_menu_page( 'tools.php' );                  //Tools
+		remove_menu_page( 'options-general.php' );        //Settings
+	}
 }
 
 //Remove a submenu
