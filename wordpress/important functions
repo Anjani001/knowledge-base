@@ -1,0 +1,113 @@
+add_option( $option, $value = ', $deprecated = ', $autoload = yes )
+update_option( $option, $newvalue )
+get_option( $option, $default = false )
+delete_option( $option )
+get_user_by( $field, $value )
+get_userdata( $userid )
+get_user_meta( $user_id, $key = '', $single = false )
+update_user_meta( $user_id, $meta_key, $meta_value, $prev_value = '' )
+add_user_meta($user_id, $meta_key, $meta_value, $unique = false)
+delete_user_meta($user_id, $meta_key, $meta_value = '')
+get_post_meta($post_id, $key = '', $single = false)
+update_post_meta($post_id, $meta_key, $meta_value, $prev_value = '')
+add_post_meta($post_id, $meta_key, $meta_value, $unique = false)
+delete_post_meta($post_id, $meta_key, $meta_value = '')
+
+
+add_action( 'wp_dashboard_setup', 'my_dashboard_setup_function' );
+function my_dashboard_setup_function() {
+    add_meta_box( 'my_dashboard_widget', 'My Widget Name', 'my_dashboard_widget_function', 'dashboard', 'side', 'high' );
+}
+function my_dashboard_widget_function() {
+    // widget content goes here
+	echo "dashboard test";
+}
+
+//add a monthly interval to use in cron jobs
+function sp_cron_schedules($schedules)
+{
+$schedules['monthly'] = array(
+'interval' => 60*60*24*30, //really 30 days
+'display' => 'Once a Month'
+);
+}
+add_filter( 'cron_schedules', 'sp_cron_schedules' );
+
+//run on Mondays
+function sp_monday_cron()
+{
+//get day of the week, 0-6, starting with Sunday
+$weekday = date("w");
+//is it Monday?
+if($weekday == "1")
+{
+//execute this code on Mondays
+}
+}
+add_action("sp_daily_cron", "sp_monday_cron");
+
+get_plugin_data($plugin_file, $markup = true, $translate = true)
+
+add_filter( 'the_generator', '__return_null' );
+
+
+Add Custom .htaccess Rules for Locking Down wp-admin
+if you are not sure of your external IP address:
+	order deny,allow
+	allow from 127.0.0.1 #(repeat this line for multiple IP addresses)
+	deny from all
+
+If you suspect that certain IP addresses hitting your application are bots or malicious
+users, you can block them by their IP addresses with the following code:
+	order allow,deny
+	deny from 127.0.0.1 #(repeat this line for multiple IP addresses)
+	allow from all
+	
+	
+	
+	
+	<?php
+/*
+Plugin Name: Always HTTPS
+Plugin URI: http://www.strangerstudios.com/wp/always-https
+Description: Redirect all URLs to the HTTPS version.
+Version: .1
+Author: strangerstudios
+*/
+/*
+Make sure to set FORCE_SSL_ADMIN to true.
+Add the following to your wp-config.php:
+define('FORCE_SSL_ADMIN', true);
+*/
+//redirect to https
+function always_https_redirect()
+{
+//if FORCE_SSL_ADMIN is true and we're not over HTTPS
+if(force_ssl_admin() && !is_ssl()){
+//redirect to https version of the page
+wp_redirect("https://" . $_SERVER['HTTP_HOST'] .
+$_SERVER['REQUEST_URI']);
+exit;
+}
+}
+add_action('wp', 'always_https_redirect', 2);
+//(optional) Tell Paid Memberships Pro to get on board with the HTTPS redirect.
+add_filter("pmpro_besecure", "__return_true");
+?>
+
+
+//lock down our members group
+function my_buddy_press_members_group()
+{
+$uri = $_SERVER['REQUEST_URI'];
+if(strtolower(substr($uri, 0, 16)) == "/groups/members/")
+{
+//make sure they are a member
+if(!pmpro_hasMembershipLevel())
+{
+wp_redirect(pmpro_url("levels"));
+exit;
+}
+}
+}
+add_action("init", "my_buddy_press_members_group");
